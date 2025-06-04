@@ -58,12 +58,13 @@ def login():
         user = db.users.find_one({"email": email})
 
         if user and check_password_hash(user['password'], password):
+            # Successful login: store user info in session
             session['user_id'] = str(user['_id'])
             session['username'] = user['username']
-            flash('Login successful!')
-            return redirect(url_for('index'))
+            flash('Logged in successfully!', 'success')
+            return redirect(url_for('index'))  # or your home/dashboard page
         else:
-            flash('Invalid email or password')
+            flash('Invalid email or password.', 'danger')
             return redirect(url_for('auth.login'))
 
     return render_template('login.html')
