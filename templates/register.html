@@ -1,0 +1,98 @@
+<!-- templates/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4 text-center">Register</h3>
+                        <form method="POST" action="{{ url_for('auth.register') }}">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" name="username" id="username" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" name="email" id="email" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" name="password" id="password" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="birth_date" class="form-label">Date of Birth</label>
+                                <input type="date" name="birth_date" id="birth_date" class="form-control">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="country_of_birth" class="form-label">Country of Birth</label>
+                                <select name="country_of_birth" id="country_of_birth" class="form-select">
+                                    <option value="">Select a country</option>
+                                    {% for country in countries %}
+                                        <option value="{{ country }}">{{ country }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="selectedInterests" class="form-label">Selected Book Interests</label>
+                                <input type="text" class="form-control" id="selectedInterests" placeholder="Favorite Types of Books: " readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="book_interests" class="form-label"></label>
+                                {% for genre in book_genres %}
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input book-interest-checkbox" type="checkbox" name="book_interests" id="genre_{{ loop.index }}" value="{{ genre }}">
+                                        <label class="form-check-label" for="genre_{{ loop.index }}">{{ genre }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="about" class="form-label">Tell us about yourself</label>
+                                <textarea name="about" id="about" rows="4" class="form-control"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Register</button>
+                        </form>
+
+                        <p class="mt-3 text-center">Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const checkboxes = document.querySelectorAll('.book-interest-checkbox');
+        const input = document.getElementById('selectedInterests');
+
+        function updateSelectedInterests() {
+            const selected = [];
+            checkboxes.forEach(cb => {
+            if (cb.checked) selected.push(cb.value);
+            });
+            input.value = selected.join(', ');
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateSelectedInterests);
+        });
+
+        // Initialize input in case some are pre-checked (e.g., edit form)
+        updateSelectedInterests();
+    </script>
+
+</body>
+</html>
