@@ -2,6 +2,7 @@ from flask import Flask, render_template
 from flask_session import Session
 from pymongo import MongoClient
 from routes.auth_routes import auth_bp
+from db import db
 import os
 
 app = Flask(__name__)

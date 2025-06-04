@@ -19,9 +19,8 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         birth_date = request.form.get('birth_date')
-        nationality = request.form.get('nationality')
         country_of_birth = request.form.get('country_of_birth')
-        book_interests = request.form.get('book_interests')
+        book_interests = request.form.getlist('book_interests[]')
         about = request.form.get('about')
 
         # Check if user already exists
@@ -29,8 +28,9 @@ def register():
             flash('Email address already exists', 'danger')
             return redirect(url_for('auth.register'))
 
+
         # Hash the password
-        hashed_password = generate_password_hash(password, method='sha256')
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
         # Insert new user into DB
         db.users.insert_one({
@@ -38,14 +38,13 @@ def register():
             "email": email,
             "password": hashed_password,
             "birth_date": birth_date,
-            "nationality": nationality,
             "country_of_birth": country_of_birth,
             "book_interests": book_interests,
             "about": about
         })
 
         flash('Registration successful! Please log in.', 'success')
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('auth.home'))
 
     return render_template('register.html', countries=countries, book_genres=BOOK_GENRES)
 
@@ -62,12 +61,26 @@ def login():
             session['user_id'] = str(user['_id'])
             session['username'] = user['username']
             flash('Logged in successfully!', 'success')
-            return redirect(url_for('index'))  # or your home/dashboard page
+            return redirect(url_for('auth.home'))  # or your home/dashboard page
         else:
             flash('Invalid email or password.', 'danger')
             return redirect(url_for('auth.login'))
 
     return render_template('login.html')
+
+@auth_bp.route('/home')
+def home():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))  # protect home if not logged in
+
+    username = session.get('username')
+    return render_template('home.html', username=username)
+
+@auth_bp.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    return render_template('profile.html')
 
 @auth_bp.route('/logout')
 def logout():

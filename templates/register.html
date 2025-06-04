@@ -54,7 +54,7 @@
                                 <label for="book_interests" class="form-label"></label>
                                 {% for genre in book_genres %}
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input book-interest-checkbox" type="checkbox" name="book_interests" id="genre_{{ loop.index }}" value="{{ genre }}">
+                                        <input class="form-check-input book-interest-checkbox" type="checkbox" name="book_interests[]" id="genre_{{ loop.index }}" value="{{ genre }}">
                                         <label class="form-check-label" for="genre_{{ loop.index }}">{{ genre }}</label>
                                     </div>
                                 {% endfor %}
