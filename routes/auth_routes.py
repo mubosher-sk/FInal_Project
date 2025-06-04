@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from werkzeug.security import generate_password_hash, check_password_hash
 import pycountry
 from db import db  # the MongoDB db instance from app.py
+from datetime import date
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -46,7 +47,7 @@ def register():
         flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('auth.home'))
 
-    return render_template('register.html', countries=countries, book_genres=BOOK_GENRES)
+    return render_template('register.html', countries=countries, book_genres=BOOK_GENRES, current_year=date.today().isoformat())
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -71,10 +72,12 @@ def login():
 @auth_bp.route('/home')
 def home():
     if 'user_id' not in session:
-        return redirect(url_for('auth.login'))  # protect home if not logged in
-
-    username = session.get('username')
-    return render_template('home.html', username=username)
+        return redirect(url_for('auth.login'))  # redirect if not logged in
+    user = {
+        'id': session['user_id'],
+        'username': session['username']
+    }
+    return render_template('home.html', user=user)
 
 @auth_bp.route('/profile')
 def profile():
