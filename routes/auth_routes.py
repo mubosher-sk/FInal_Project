@@ -1,6 +1,7 @@
 # routes/auth_routes.py
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from bson.objectid import ObjectId
 import pycountry
 from db import db  # the MongoDB db instance from app.py
 from datetime import date
@@ -77,7 +78,33 @@ def home():
         'id': session['user_id'],
         'username': session['username']
     }
-    return render_template('home.html', user=user)
+
+    books = [
+        {
+            'title': '1984',
+            'genre': 'Dystopian',
+            'description': 'A classic dystopian novel by George Orwell.',
+            'image': 'https://covers.openlibrary.org/b/id/7222246-L.jpg'
+        },
+        {
+            'title': 'The Great Gatsby',
+            'genre': 'Classic',
+            'description': 'A novel written by F. Scott Fitzgerald.',
+            'image': 'https://covers.openlibrary.org/b/id/8226191-L.jpg'
+        },
+        {
+            'title': 'Sapiens',
+            'genre': 'Non-fiction',
+            'description': 'A brief history of humankind by Yuval Noah Harari.',
+            'image': 'https://covers.openlibrary.org/b/id/8370221-L.jpg'
+        }
+    ]
+
+    # Optional: fetch user interests from DB
+    user_doc = db.users.find_one({'_id': ObjectId(session['user_id'])})
+    user_interests = user_doc.get('book_interests') if user_doc else []
+
+    return render_template('home.html', user=user, books=books, user_interests=user_interests)
 
 @auth_bp.route('/profile')
 def profile():

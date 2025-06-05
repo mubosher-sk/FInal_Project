@@ -1,4 +1,3 @@
-<!-- templates/home.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
         <a class="navbar-brand" href="#">📚 Bookstore</a>
         <div class="ms-auto">
@@ -15,9 +15,54 @@
         </div>
     </nav>
 
+    <!-- Welcome Message -->
     <div class="container mt-5">
         <h1>Welcome, {{ user.username }}!</h1>
         <p class="lead">Explore your favorite books and discover new genres.</p>
+
+        <!-- Search Bar -->
+        <form class="d-flex my-4" method="GET" action="#">
+            <input class="form-control me-2" type="search" placeholder="Search for books..." aria-label="Search">
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+        </form>
+
+        <!-- Personalized Suggestions -->
+        {% if user_interests %}
+        <div class="mb-5">
+            <h4>Books You Might Like</h4>
+            <ul>
+                <li>Recommended for: 
+                    {% for interest in user_interests %}
+                        <strong>{{ interest}}</strong>
+                    {% endfor %}
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Featured Books -->
+        <h3>Featured Books</h3>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for book in books %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="{{ book.image }}" class="card-img-top" alt="Book Cover">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text">{{ book.description[:100] }}...</p>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">Genre: {{ book.genre }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        &copy; 2025 Bookstore. All rights reserved.
+    </footer>
 </body>
 </html>
