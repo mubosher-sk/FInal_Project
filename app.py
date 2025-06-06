@@ -2,6 +2,7 @@ from flask import Flask, render_template
 from flask_session import Session
 from pymongo import MongoClient
 from routes.auth_routes import auth_bp
+from routes.home_routes import home_bp
 from db import db
 import os
 
@@ -26,5 +27,6 @@ def index():
     return render_template("index.html")
 
 app.register_blueprint(auth_bp)
+app.register_blueprint(home_bp)
 if __name__ == "__main__":
     app.run(debug=True)

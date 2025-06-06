@@ -46,7 +46,7 @@ def register():
         })
 
         flash('Registration successful! Please log in.', 'success')
-        return redirect(url_for('auth.home'))
+        return redirect(url_for('home.home'))
 
     return render_template('register.html', countries=countries, book_genres=BOOK_GENRES, current_year=date.today().isoformat())
 
@@ -63,54 +63,12 @@ def login():
             session['user_id'] = str(user['_id'])
             session['username'] = user['username']
             flash('Logged in successfully!', 'success')
-            return redirect(url_for('auth.home'))  # or your home/dashboard page
+            return redirect(url_for('home.home'))  # or your home/dashboard page
         else:
             flash('Invalid email or password.', 'danger')
             return redirect(url_for('auth.login'))
 
     return render_template('login.html')
-
-@auth_bp.route('/home')
-def home():
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))  # redirect if not logged in
-    user = {
-        'id': session['user_id'],
-        'username': session['username']
-    }
-
-    books = [
-        {
-            'title': '1984',
-            'genre': 'Dystopian',
-            'description': 'A classic dystopian novel by George Orwell.',
-            'image': 'https://covers.openlibrary.org/b/id/7222246-L.jpg'
-        },
-        {
-            'title': 'The Great Gatsby',
-            'genre': 'Classic',
-            'description': 'A novel written by F. Scott Fitzgerald.',
-            'image': 'https://covers.openlibrary.org/b/id/8226191-L.jpg'
-        },
-        {
-            'title': 'Sapiens',
-            'genre': 'Non-fiction',
-            'description': 'A brief history of humankind by Yuval Noah Harari.',
-            'image': 'https://covers.openlibrary.org/b/id/8370221-L.jpg'
-        }
-    ]
-
-    # Optional: fetch user interests from DB
-    user_doc = db.users.find_one({'_id': ObjectId(session['user_id'])})
-    user_interests = user_doc.get('book_interests') if user_doc else []
-
-    return render_template('home.html', user=user, books=books, user_interests=user_interests)
-
-@auth_bp.route('/profile')
-def profile():
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    return render_template('profile.html')
 
 @auth_bp.route('/logout')
 def logout():

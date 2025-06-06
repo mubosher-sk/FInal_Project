@@ -1,0 +1,60 @@
+body {
+    background: linear-gradient(to bottom right, #f4f6fa, #dde6f1);
+    font-family: 'Segoe UI', sans-serif;
+    padding-top: 80px;
+}
+
+.custom-navbar {
+    background: linear-gradient(90deg, #4b6cb7, #182848);
+    padding: 1rem 2rem;
+}
+
+.custom-navbar .navbar-brand img {
+    height: 30px;
+}
+
+.custom-navbar .nav-link {
+    color: #f0f0f0 !important;
+    font-weight: 500;
+    margin-left: 1rem;
+}
+
+.custom-navbar .nav-link:hover {
+    color: #ffffff !important;
+    text-decoration: underline;
+}
+
+.logout-link {
+    color: #ffdddd !important;
+    font-weight: bold;
+}
+
+.search-bar {
+    max-width: 500px;
+    width: 100%;
+}
+
+.search-bar input {
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+}
+
+.search-bar button {
+    border-radius: 20px;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.footer {
+    background-color: #182848;
+    padding: 1rem;
+    margin-top: 3rem;
+}
