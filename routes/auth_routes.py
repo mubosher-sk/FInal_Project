@@ -11,10 +11,6 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     countries = sorted([country.name for country in pycountry.countries])
-    BOOK_GENRES = [
-        "Fiction", "Non-Fiction", "Science Fiction", "Fantasy",
-        "Mystery", "Romance", "Biography", "History", "Self-Help", "Comics"
-    ]
     if request.method == 'POST':
         # Get form values
         username = request.form.get('username')
@@ -22,8 +18,9 @@ def register():
         password = request.form.get('password')
         birth_date = request.form.get('birth_date')
         country_of_birth = request.form.get('country_of_birth')
-        book_interests = request.form.getlist('book_interests[]')
         about = request.form.get('about')
+        favourites = ""
+
 
         # Check if user already exists
         if db.users.find_one({"email": email}):
@@ -41,14 +38,14 @@ def register():
             "password": hashed_password,
             "birth_date": birth_date,
             "country_of_birth": country_of_birth,
-            "book_interests": book_interests,
-            "about": about
+            "about": about,
+            "favourites": favourites
         })
 
         flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('home.home'))
 
-    return render_template('register.html', countries=countries, book_genres=BOOK_GENRES, current_year=date.today().isoformat())
+    return render_template('register.html', countries=countries, current_year=date.today().isoformat())
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():

@@ -1,20 +1,21 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, abort, flash, render_template, request, redirect, url_for, session
 import requests
 from bson.objectid import ObjectId
-from db import db 
+from db import db  # Your MongoDB connection
 
 home_bp = Blueprint('home', __name__)
 
 @home_bp.route('/home')
 def home():
     if 'user_id' not in session:
-        return redirect(url_for('auth.login')) 
+        return redirect(url_for('auth.login'))
+    
     user = {
         'id': session['user_id'],
         'username': session['username']
     }
 
-    # Sample dummy data
+    # Dummy sample books data
     books = [
         {
             'title': '1984',
@@ -90,20 +91,26 @@ def home():
         }
     ]
 
-
-
     user_doc = db.users.find_one({'_id': ObjectId(session['user_id'])})
-    user_interests = user_doc.get('book_interests') if user_doc else []
+    user_interests = user_doc.get('book_interests', []) if user_doc else []
+    user_favourites = user_doc.get('favorites', []) if user_doc else []
 
-    return render_template('home.html', user=user, books=books, user_interests=user_interests)
+    return render_template('home.html', user=user, books=books, user_interests=user_interests, favourites=user_favourites)
+
 
 @home_bp.route('/browse')
 def all_books():
     return render_template('browse.html')
 
+
 @home_bp.route('/favourites')
 def favourites():
-    return render_template('favourites.html') 
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    user_doc = db.users.find_one({'_id': ObjectId(session['user_id'])})
+    favourites = user_doc.get('favourites', []) if user_doc else []
+    return render_template('favourites.html', books=favourites)
 
 
 @home_bp.route('/search')
@@ -117,12 +124,12 @@ def search():
     data = response.json()
 
     books = []
-    for doc in data.get('docs', [])[:40]:  # Check more entries, filter later
+    for doc in data.get('docs', [])[:40]:
         title = doc.get('title', '')
         authors = doc.get('author_name', [])
         cover_id = doc.get('cover_i')
+        work_key = doc.get('key')  # e.g. '/works/OL12345W'
 
-        # Apply filters: must have cover, reasonable title length, at least one author
         if not cover_id or len(title) > 100 or not authors:
             continue
 
@@ -130,10 +137,70 @@ def search():
             'title': title,
             'description': "By " + ", ".join(authors),
             'genre': ", ".join(doc.get('subject', [])[:2]) if doc.get('subject') else 'Unknown',
-            'image': f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
+            'image': f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg",
+            'work_key': work_key.replace('/works/', '')  # Just the key id for URL param
         })
 
     return render_template('search_results.html', query=query, books=books)
+
+
+@home_bp.route('/add_favourite', methods=['POST'])
+def add_favourite():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    book = {
+        'title': request.form.get('title'),
+        'image': request.form.get('image'),
+        'description': request.form.get('description'),
+        'genre': request.form.get('genre')
+    }
+
+    db.users.update_one(
+        {'_id': ObjectId(session['user_id'])},
+        {'$addToSet': {'favourites': book}}
+    )
+
+    flash(f'Added "{book["title"]}" to your favourites!', 'success')
+    return redirect(request.referrer or url_for('home.home'))
+
+@home_bp.route('/book/<book_key>')
+def book_detail(book_key):
+    # The book_key here is the OpenLibrary work key id, e.g. OL12345W
+    url = f"https://openlibrary.org/works/{book_key}.json"
+    resp = requests.get(url)
+    if resp.status_code != 200:
+        abort(404)
+
+    book_data = resp.json()
+    # Optional: Fetch additional details like description, covers, authors
+    cover_id = book_data.get('covers', [None])[0]
+    cover_url = f"https://covers.openlibrary.org/b/id/{cover_id}-L.jpg" if cover_id else None
+
+    # Format author names if available
+    authors = []
+    for author in book_data.get('authors', []):
+        author_key = author.get('author', {}).get('key')
+        if author_key:
+            author_resp = requests.get(f"https://openlibrary.org{author_key}.json")
+            if author_resp.status_code == 200:
+                author_data = author_resp.json()
+                authors.append(author_data.get('name'))
+
+    description = book_data.get('description')
+    if isinstance(description, dict):
+        description = description.get('value')
+    elif isinstance(description, str):
+        pass
+    else:
+        description = "No description available."
+
+    return render_template('book_detail.html',
+                           book=book_data,
+                           cover_url=cover_url,
+                           authors=authors,
+                           description=description)
+
 
 @home_bp.route('/profile')
 def profile():

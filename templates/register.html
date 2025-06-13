@@ -46,21 +46,6 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="selectedInterests" class="form-label">Selected Book Interests</label>
-                                <input type="text" class="form-control" id="selectedInterests" placeholder="Favorite Types of Books: " readonly>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="book_interests" class="form-label"></label>
-                                {% for genre in book_genres %}
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input book-interest-checkbox" type="checkbox" name="book_interests[]" id="genre_{{ loop.index }}" value="{{ genre }}">
-                                        <label class="form-check-label" for="genre_{{ loop.index }}">{{ genre }}</label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-
-                            <div class="mb-3">
                                 <label for="about" class="form-label">Tell us about yourself</label>
                                 <textarea name="about" id="about" rows="4" class="form-control"></textarea>
                             </div>
