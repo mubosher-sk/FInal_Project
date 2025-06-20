@@ -4,3 +4,4 @@ dnspython
 requests
 flask-session
 pycountry
+gunicorn
